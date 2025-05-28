@@ -1,0 +1,6 @@
+[submodule "trepi-server"]
+	path = trepi-server
+	url = https://github.com/giragon6/trepi-server
+[submodule "trepi-app"]
+	path = trepi-app
+	url = https://github.com/giragon6/trepi-app
