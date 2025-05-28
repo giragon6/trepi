@@ -1,0 +1,58 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - '6500:5432'
+    volumes:
+      - pg_data:/var/lib/postgres
+    env_file:
+      - ./trepi-server/.env
+    networks:
+      - postgresNetwork
+
+  pgAdmin:
+    image: dpage/pgadmin4
+    container_name: pgAdmin
+    env_file:
+      - ./trepi-server/.env
+    ports:
+      - "5050:80"
+    networks:
+      - postgresNetwork
+
+  # frontend:
+  #   build:
+  #     context: ./trepi-app
+  #     dockerfile: Dockerfile
+  #   container_name: trepi-app
+  #   ports:
+  #     - '3000:3000'
+  #   env_file:
+  #     - ./trepi-app/.env
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     postgresNetwork:
+
+  backend:
+    build:
+      context: ./trepi-server
+      dockerfile: Dockerfile
+    container_name: trepi-server
+    ports:
+      - '8000:8000'
+    env_file:
+      - ./trepi-server/.env
+    depends_on:
+      - db
+    networks:
+      - postgresNetwork
+
+volumes:
+  pg_data:
+    driver: local
+
+networks:
+  postgresNetwork:
+    driver: bridge
