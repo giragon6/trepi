@@ -34,7 +34,7 @@ services:
     ports:
       - '${FRONTEND_PORT}:3000'
     environment:
-      API_BASE_URL: http://backend:8000/api/v1
+      API_BASE_URL: http://trepi-api.giragon6.hackclub.app/api/v1
     depends_on:
       - backend
     networks:
