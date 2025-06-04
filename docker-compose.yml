@@ -1,39 +1,16 @@
 services:
-  db:
-    image: postgres:latest
-    container_name: postgres
-    ports:
-      - '6500:5432'
-    volumes:
-      - pg_data:/var/lib/postgres
-    env_file:
-      - ./trepi-server/.env
-    networks:
-      - postgresNetwork
-
-  pgAdmin:
-    image: dpage/pgadmin4
-    container_name: pgAdmin
-    env_file:
-      - ./trepi-server/.env
-    ports:
-      - "5050:80"
-    networks:
-      - postgresNetwork
-
-  # frontend:
-  #   build:
-  #     context: ./trepi-app
-  #     dockerfile: Dockerfile
-  #   container_name: trepi-app
+  # db:
+  #   image: postgres:latest
+  #   container_name: trepi-postgres
   #   ports:
-  #     - '3000:3000'
+  #     - '${DB_PORT}:5432'
+  #   volumes:
+  #     - pg_data:/var/lib/postgresql/data
   #   env_file:
-  #     - ./trepi-app/.env
-  #   depends_on:
-  #     - backend
+  #     - ./trepi-server/.env
+  #   restart: always
   #   networks:
-  #     postgresNetwork:
+  #     - trepi_network
 
   backend:
     build:
@@ -41,18 +18,31 @@ services:
       dockerfile: Dockerfile
     container_name: trepi-server
     ports:
-      - '8000:8000'
-    env_file:
-      - ./trepi-server/.env
-    depends_on:
-      - db
+      - '${BACKEND_PORT}:8000'
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      RUST_LOG: info
+    restart: unless-stopped
     networks:
-      - postgresNetwork
+      - trepi_network
+
+  frontend:
+    build:
+      context: ./trepi-app
+      dockerfile: Dockerfile
+    container_name: trepi-app
+    ports:
+      - '${FRONTEND_PORT}:3000'
+    environment:
+      API_BASE_URL: http://backend:8000/api/v1
+    depends_on:
+      - backend
+    networks:
+      trepi_network
 
 volumes:
   pg_data:
-    driver: local
 
 networks:
-  postgresNetwork:
+  trepi_network:
     driver: bridge
